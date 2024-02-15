@@ -1,0 +1,21 @@
+import requests
+from getpass import getpass
+
+def authenticate_user(user_id, password):
+    api_url = 'https://your-api-endpoint/api/authenticate'
+    payload = {'userID': user_id, 'password': password}
+    
+    response = requests.post(api_url, json=payload)
+
+    if response.status_code == 200:
+        data = response.json()
+        print("Authentication successful.")
+        print("Data received:", data)
+    else:
+        print("Authentication failed. Error:", response.json())
+
+if __name__ == '__main__':
+    user_id = input("Enter User ID: ")
+    password = getpass("Enter Password: ")
+
+    authenticate_user(user_id, password)
