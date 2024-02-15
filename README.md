@@ -1,1 +1,1 @@
-You need to have requests and bcrypt libraries installed.
+You need to have 'requests' and 'bcrypt' libraries installed.
