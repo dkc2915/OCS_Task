@@ -1,0 +1,43 @@
+from flask import Flask, request, jsonify
+from flask_bcrypt import Bcrypt
+import psycopg2
+import os
+
+app = Flask(__name__)
+bcrypt = Bcrypt(app)
+
+# Set up database connection
+DATABASE_URL = os.environ['DATABASE_URL']  # Replace with your actual database URL
+conn = psycopg2.connect(DATABASE_URL, sslmode='require')
+cursor = conn.cursor()
+
+# API endpoint for user authentication and data retrieval
+@app.route('/api/authenticate', methods=['POST'])
+def authenticate_user():
+    data = request.get_json()
+
+    user_id = data.get('userID')
+    password = data.get('password')
+
+    # Fetch user data from the database
+    cursor.execute("SELECT * FROM users WHERE userid=%s", (user_id,))
+    user = cursor.fetchone()
+
+    if not user or not bcrypt.check_password_hash(user[1], password):
+        return jsonify({'error': 'Invalid credentials'}), 401
+
+    # Check user role
+    if user[2] == 'admin':
+        # If admin, retrieve all data
+        cursor.execute("SELECT * FROM table")
+        results = cursor.fetchall()
+    else:
+        # If not admin, retrieve only user-specific data
+        cursor.execute("SELECT * FROM table WHERE userid=%s", (user_id,))
+        results = cursor.fetchall()
+
+    return jsonify({'data': results})
+
+
+if __name__ == '__main__':
+    app.run(debug=True)
